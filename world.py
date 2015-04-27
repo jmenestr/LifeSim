@@ -11,8 +11,8 @@ class World:
 
     def createElement(self,char):
         if char == " ":
-            return None
-        element = self.legend[char]()
+            return " "
+        element = self.legend[char](char)
         return element
 
     def setUpWorld(self,plan):
@@ -25,9 +25,16 @@ class World:
                 self.grid.set(Vector(x,y),element)
 
     def charFromElement(self,element):
-        if element == None:
+        if element == " ":
             return " "
         return element.char
+
+    def turn(self):
+        for critter in self.critters:
+            new_pos = critter.move(self.grid)
+            self.grid.set(critter.position," ")
+            self.grid.set(new_pos,critter)
+            critter.setPosition(new_pos)
 
     def worldToString(self):
         output = ""
@@ -37,9 +44,5 @@ class World:
                 output += self.charFromElement(element)
             output += "\n"
         return output
-
-    def turn(self):
-        for critter in self.critters:
-            critter.act(self.grid)
 
 

@@ -1,6 +1,7 @@
 from vector import *
 import random
 
+
 class Wall:
 
     def __init__(self,char = "#"):
@@ -11,7 +12,7 @@ class Wall:
 
 
 class BouncingCritter:
-    def __init__(self, pos=Vector(-1,-1), char="o"):
+    def __init__(self, char, pos=Vector(-1,-1)):
         self.char = char
         self.position = pos
         self.directions = {
@@ -28,20 +29,21 @@ class BouncingCritter:
     def setPosition(self,vector):
         self.position = vector
 
-    def act(self,world):
-        self.move(world)
+    def getDirection(self):
+        dir_keys = [key for key in self.directions.keys()]
+        return random.choice(dir_keys)
 
-    def move(self,world):
-        dir_keys = [key for key in self.directions]
-        dir = random.choice(dir_keys)
-        dir_vector = self.directions[dir]
+    def move(self,world_grid):
+        dir = self.getDirection()
+        dir_vec = self.directions[dir]
+        if self.critterLook(world_grid,dir_vec) == " ":
+            return self.position.plus(dir_vec)
+        return self.position
 
-        crit_view = View(world,self.position)
-        if crit_view.look(dir_vector) == " ":
-            print("asdf")
-            world.world.set(self.position.plus(dir_vector),"o")
-            world.world.set(self.position," ")
-            self.setPosition(self.position.plus(dir_vector))
+    def critterLook(self,world_grid,direction):
+        target_pos = self.position.plus(direction)
+        return world_grid.get(target_pos)
+
 
     def OriginChar(self):
         return self.char

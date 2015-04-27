@@ -2,26 +2,33 @@
 from grid import *
 from vector import *
 from world import *
+import os
+import time
 
 
 plan = ["############################",
-            "#      #    #      o      ##",
-            "#                          #",
-            "#          #####           #",
-            "##         #   #    ##     #",
+            "#      #    #      f      ##",
+            "# f                  f     #",
+            "#      x   #####           #",
+            "##     f    #   #    ##  f #",
             "###           ##     #     #",
             "#           ###      #     #",
-            "#   ####                   #",
-            "#   ##       o             #",
-            "# o  #         o       ### #",
-            "#    #                     #",
+            "#   ####         x         #",
+            "#   ##       f         x   #",
+            "# f  #         f       ### #",
+            "#    #     x            f  #",
             "############################"]
 
 
-world = World(plan,{"#": Wall,"o": BouncingCritter})
+world = World(plan,{"#": Wall,"f": BouncingCritter,"x": BouncingCritter})
 
 print(world.worldToString())
 
-world.turn()
+for i in range(100):
+    os.system("cls")
+    world.turn()
+    print(world.worldToString())
+    time.sleep(0.250)
 
-print(world.worldToString())
+
+
