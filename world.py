@@ -27,21 +27,42 @@ class World:
     def charFromElement(self,element):
         if element == " ":
             return " "
-        return element.char
+        return element.OriginChar()
+
+    def isempty(self):
+        if len(self.critters) <= 0:
+            return True
 
     def turn(self):
+        critters_after_turn = []
         for critter in self.critters:
+            (event,dest) = critter.act(self.grid)
+            if event["action"] == "move":
+                self.grid.set(critter.position," ")
+                self.grid.set(dest,critter)
+                critter.setPosition(dest)
+                critters_after_turn.append(critter)
+            if event["action"] == "reproduce":
+                baby_crit = BouncingCritter(critter.OriginChar(),dest)
+                self.grid.set(dest,baby_crit)
+                critters_after_turn.append(critter)
+                critters_after_turn.append(baby_crit)
+            if event["action"] == "die":
+                self.grid.set(critter.position," ")
+        self.critters = critters_after_turn
+        '''
             new_pos = critter.move(self.grid)
             self.grid.set(critter.position," ")
             self.grid.set(new_pos,critter)
-            critter.setPosition(new_pos)
+            critter.setPosition(new_pos)'''
 
     def worldToString(self):
         output = ""
         for y in range(self.grid.height):
             for x in range(self.grid.width):
                 element = self.grid.get(Vector(x,y))
-                output += self.charFromElement(element)
+                char = self.charFromElement(element)
+                output += char
             output += "\n"
         return output
 
