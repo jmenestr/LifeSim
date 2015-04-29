@@ -19,7 +19,7 @@ class World:
         for y, line in enumerate(plan):
             for x, char in enumerate(line):
                 element = self.createElement(char)
-                if isinstance(element,BouncingCritter):
+                if isinstance(element,BouncingCritter) or isinstance(element,WallFollower):
                     element.setPosition(Vector(x,y))
                     self.critters.append(element)
                 self.grid.set(Vector(x,y),element)

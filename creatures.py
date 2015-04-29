@@ -10,8 +10,7 @@ class Wall:
     def OriginChar(self):
         return self.char
 
-
-class BouncingCritter:
+class Life_Form:
     def __init__(self, char, pos=Vector(-1,-1)):
         self.char = char
         self.position = pos
@@ -29,6 +28,53 @@ class BouncingCritter:
 
     def setPosition(self,vector):
         self.position = vector
+
+    def loseEnergy(self,value = 0.2):
+        self.energy -= value
+
+    def returnEnergy(self):
+        return self.energy
+
+    def eat(self):
+        pass
+
+    def act(self,world_grid):
+        pass
+
+    def getDirection(self):
+        dir_keys = [key for key in self.directions.keys()]
+        return random.choice(dir_keys)
+
+    def critterLook(self,world_grid,direction):
+        target_pos = self.position.plus(direction)
+        return world_grid.get(target_pos)
+
+    def findFreeSquares(self,world_gird):
+        direction_keys = [key for key in self.directions.keys()]
+        free_direction_vectors = []
+        for direction in direction_keys:
+            direction_vector = self.directions[direction]
+            if self.critterLook(world_gird,direction_vector) == " ":
+                free_direction_vectors.append(direction_vector)
+        return free_direction_vectors
+
+    def OriginChar(self):
+        return self.char
+
+def Plant(LifeForm):
+    def __init__(self,char,pos=Vector(-1,-1)):
+        super(Plant,self).__init__(char,pos)
+        self.energy = random.randint(1,5)+3
+
+    def gainEnergy(self,value = 0.5):
+        self.energy += value
+
+
+class BouncingCritter(Life_Form):
+
+    def __init__(self, char, pos=Vector(-1,-1)):
+        super(BouncingCritter,self).__init__(char,pos)
+
 
     def getDirection(self):
         dir_keys = [key for key in self.directions.keys()]
@@ -68,55 +114,56 @@ class BouncingCritter:
     def eat(self,world_grid):
         event = {"action": "eat"}
 
-
-    def critterLook(self,world_grid,direction):
-        target_pos = self.position.plus(direction)
-        return world_grid.get(target_pos)
-
-
-    def OriginChar(self):
-        return self.char
-
-class Plant:
+class WallFollower(Life_Form):
     def __init__(self, char, pos=Vector(-1,-1)):
-        self.char = char
-        self.position = pos
-        self.directions = {
-            "n": Vector(0,1),
-            "ne": Vector(1,1),
-            "e": Vector(1,0),
-            "se": Vector(1,-1),
-            "s": Vector(0,-1),
-            "sw": Vector(-1,-1),
-            "w": Vector(-1,0),
-            "nw": Vector(-1,1)
-        }
-        self.energy = 10
+        super(WallFollower,self).__init__(char,pos)
+        self.current_dir = "w"
 
-    def setPosition(self,vector):
-        self.position = vector
 
-    def getDirection(self):
-        dir_keys = [key for key in self.directions.keys()]
-        return random.choice(dir_keys)
+    def dirPlus(self,value):
+        compass = ["e","ne","n","nw","w","sw","s","se"]
+        current_index = compass.index(self.current_dir)
+        return compass[((current_index+value) % 8)]
+
+    def getDirection(self,world_grid):
+        behind = self.directions[self.dirPlus(-3)]
+        if self.critterLook(world_grid,behind) != " ":
+            self.current_dir = self.dirPlus(-2)
+            dir = self.directions[self.current_dir ]
+        else:
+            start = self.current_dir
+            dir = self.directions[start]
+        turn = 0
+        while self.critterLook(world_grid,dir) != " ":
+            turn += 1
+            dir = self.directions[self.dirPlus(turn)]
+        self.current_dir = self.dirPlus(turn)
+        return dir
 
     def act(self,world_grid):
-        pass
+        if self.energy >= 15:
+            self.energy -= 14
+            return self.reproduce(world_grid)
+        elif self.energy <= 0:
+            return self.die(world_grid)
+        else:
+            self.energy -= .2
+            return self.move(world_grid)
 
-    def grow(self,value=0.5):
-        self.energy += value
+    def move(self,world_grid):
+        event = {"action": "move"}
+        dir_vec = self.getDirection(world_grid)
+        return event,self.position.plus(dir_vec)
 
-    def reproduce(self,world_grid): #returns to world position vector to grow into
-        pass
-    def critterLook(self,world_grid,direction):
-        target_pos = self.position.plus(direction)
-        return world_grid.get(target_pos)
+    def reproduce(self,world_grid):
+        event = {"action":"reproduce"}
+        dir = self.getDirection(world_grid)
+        dest = self.directions[dir]
+        while self.critterLook(world_grid,dest) != " ":
+            dir = self.getDirection()
+            dest = self.directions[dir]
+        return event,self.position.plus(dest)
 
-    def findEmptySquares(self,world_grid,direction,space = " "):
-        dir_keys = [key for key in self.directions.keys()]
-        for direction in dir_keys:
-            pass
-
-
-    def OriginChar(self):
-        return self.char
+    def die(self,world_grid):
+        event = {"action":"die"}
+        return event,self.position

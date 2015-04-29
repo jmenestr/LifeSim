@@ -7,7 +7,7 @@ import time
 
 
 plan =     ["#############################",
-            "#      #    #      f       ##",
+            "#      #    #      f      ~##",
             "# f                  f      #",
             "#      x   #####            #",
             "##     f    #   #    ##  f  #",
@@ -16,11 +16,11 @@ plan =     ["#############################",
             "#   ####         x          #",
             "#   ##                      #",
             "# f  #         f       ###  #",
-            "#    #     x            f   #",
+            "#    #     x     ~      f   #",
             "#############################"]
 
 
-world = World(plan,{"#": Wall,"f": BouncingCritter,"x": BouncingCritter})
+world = World(plan,{"#": Wall,"f": BouncingCritter,"x": BouncingCritter,"~": WallFollower})
 
 for i in range(100):
     os.system("cls")
@@ -29,6 +29,6 @@ for i in range(100):
     if world.isempty():
         print("All critters have died.")
         break
-    #time.sleep(.10)
+    time.sleep(.10)
 
 
