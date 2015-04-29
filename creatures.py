@@ -100,12 +100,12 @@ class BouncingCritter(Life_Form):
 
     def reproduce(self,world_grid):
         event = {"action":"reproduce"}
-        dir = self.getDirection()
-        dest = self.directions[dir]
-        while self.critterLook(world_grid,dest) != " ":
-            dir = self.getDirection()
-            dest = self.directions[dir]
-        return event,self.position.plus(dest)
+        free_spaces = self.findFreeSquares(world_grid)
+        if len(free_spaces) > 0:
+            dest = random.choice(free_spaces)
+            return event,self.position.plus(dest)
+        else:
+            return self.move(world_grid)
 
     def die(self,world_grid):
         event = {"action":"die"}
