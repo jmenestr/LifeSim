@@ -7,6 +7,7 @@ class World:
         self.grid = Grid(len(plan[0]),len(plan))
         self.legend = legend
         self.critters = []
+        self.predators = []
         self.plants = []
         self.setUpWorld(plan)
 
@@ -23,9 +24,12 @@ class World:
                 if isinstance(element,BouncingCritter) or isinstance(element,WallFollower):
                     element.setPosition(Vector(x,y))
                     self.critters.append(element)
-                if isinstance(element,Plant):
+                elif isinstance(element,Plant):
                     element.setPosition(Vector(x,y))
                     self.plants.append(element)
+                elif isinstance(element,Predator):
+                    element.setPosition(Vector(x,y))
+                    self.predators.append(element)
                 self.grid.set(Vector(x,y),element)
 
     def charFromElement(self,element):
@@ -38,8 +42,37 @@ class World:
             return True
 
     def turn(self):
+        
+        predators_after_turn = []
+        for predator in self.predators:
+            (event,dest) = predator.act(self.grid)
+            if event["action"] == "move":
+                self.grid.set(predator.position," ")
+                self.grid.set(dest,predator)
+                predator.setPosition(dest)
+                predators_after_turn.append(predator)
+            if event["action"] == "reproduce":
+                baby_pred = Predator(predator.OriginChar(),dest)
+                self.grid.set(dest,baby_pred)
+                predators_after_turn.append(predator)
+                predators_after_turn.append(baby_pred)
+            if event["action"] == "eat":
+                target_animal = self.grid.get(dest)
+                target_animal_energy = target_animal.returnEnergy()
+                predator.gainEnergy(target_animal_energy)
+                target_animal.kill()
+                self.grid.set(predator.position," ")
+                self.grid.set(dest,predator)
+                predator.setPosition(dest)
+                predators_after_turn.append(predator)
+            if event["action"] == "die":
+                self.grid.set(predator.position," ")
+        self.predators = predators_after_turn
+
         critters_after_turn = []
         for critter in self.critters:
+            if critter.isDead():
+                continue
             (event,dest) = critter.act(self.grid)
             if event["action"] == "move":
                 self.grid.set(critter.position," ")

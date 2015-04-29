@@ -10,7 +10,7 @@ class Wall:
     def OriginChar(self):
         return self.char
 
-class Life_Form:
+class LifeForm:
     def __init__(self, char, pos=Vector(-1,-1)):
         self.char = char
         self.position = pos
@@ -64,7 +64,7 @@ class Life_Form:
     def OriginChar(self):
         return self.char
 
-class Plant(Life_Form):
+class Plant(LifeForm):
     def __init__(self,char,pos=Vector(-1,-1)):
         super(Plant,self).__init__(char,pos)
         self.energy = random.randint(1,5)+3
@@ -97,10 +97,11 @@ class Plant(Life_Form):
     def plantDead(self):
         return self.dead
 
-class BouncingCritter(Life_Form):
+class BouncingCritter(LifeForm):
 
     def __init__(self, char, pos=Vector(-1,-1)):
         super(BouncingCritter,self).__init__(char,pos)
+        self.dead = False
 
     def findPlantSquares(self,world_grid):
         direction_keys = [key for key in self.directions.keys()]
@@ -149,16 +150,85 @@ class BouncingCritter(Life_Form):
             return event,self.position.plus(dest)
         else:
             return self.move(world_grid)
+    def isDead(self):
+        return self.dead
+
+    def kill(self):
+        self.dead = True
+
+    def die(self,world_grid):
+        event = {"action":"die"}
+        return event,self.position
+
+class Predator(LifeForm):
+    def __init__(self, char, pos=Vector(-1,-1)):
+        super(Predator,self).__init__(char,pos)
+        self.energy = 30
+
+    def findAnimalSquares(self,world_grid):
+        direction_keys = [key for key in self.directions.keys()]
+        surrounding_targets = []
+        for direction in direction_keys:
+            dir_to_look=self.directions[direction]
+            element = self.critterLook(world_grid,dir_to_look)
+            if isinstance(element,BouncingCritter):
+                surrounding_targets.append(dir_to_look)
+        return surrounding_targets
+
+    def act(self,world_grid):
+        if self.energy <= 0:
+            return self.die(world_grid)
+        elif self.energy >= 40:
+            self.energy -= 20
+            return self.reproduce(world_grid)
+        elif self.energy <= 20:
+            return self.eat(world_grid)
+        else:
+            return self.move(world_grid)
+
+    def move(self,world_grid):
+        event = {"action": "move"}
+        self.energy -= 1
+        free_spaces = self.findFreeSquares(world_grid)
+        if len(free_spaces) > 0:
+            dest = random.choice(free_spaces)
+            return event,self.position.plus(dest)
+        return event,self.position
+
+    def eat(self,word_grid):
+        event = {"action":"eat"}
+        plant_spaces = self.findAnimalSquares(word_grid)
+        if len(plant_spaces) > 0:
+            destination = random.choice(plant_spaces)
+            return event,self.position.plus(destination)
+        return self.move(word_grid)
+
+
+    def reproduce(self,world_grid):
+        event = {"action":"reproduce"}
+        free_spaces = self.findFreeSquares(world_grid)
+        if len(free_spaces) > 0:
+            dest = random.choice(free_spaces)
+            return event,self.position.plus(dest)
+        else:
+            return self.move(world_grid)
 
     def die(self,world_grid):
         event = {"action":"die"}
         return event,self.position
 
 
-class WallFollower(Life_Form):
+class WallFollower(LifeForm):
     def __init__(self, char, pos=Vector(-1,-1)):
         super(WallFollower,self).__init__(char,pos)
         self.current_dir = "w"
+        self.dead = False
+
+    def kill(self):
+        self.dead = True
+
+    def isDead(self):
+        return self.dead
 
 
     def dirPlus(self,value):
