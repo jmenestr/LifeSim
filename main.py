@@ -7,27 +7,24 @@ import time
 
 
 plan =     ["#############################",
-            "#  *                       ##",
-            "#                           #",
-            "#          #####            #",
-            "##          #   #    ##     #",
-            "###           ##     #      #",
-            "#           ###      #      #",
-            "#   ####                    #",
-            "#   ##          *           #",
-            "#    #                 ###  #",
-            "#    #           ~          #",
+            "#        x        ~   x    ##",
+            "#   * ***     ~     x  **   #",
+            "#    **** #####        **   #",
+            "##          #   #  x  ##    #",
+            "###   ****  f ##     #   x  #",
+            "#     ****x ###      #      #",
+            "#   ####                   ~#",
+            "#   ##         x   **       #",
+            "#    #   **       x**  ###  #",
+            "#    #   **   ~    xxx      #",
             "#############################"]
 
 
 world = World(plan,{"#": Wall,"f": BouncingCritter,"x": BouncingCritter,"~": WallFollower,"*": Plant})
-
-for i in range(100):
+print(world.worldToString())
+while len(world.critters)>0:
+    os.system("cls")
     world.turn()
     print(world.worldToString())
-    if world.isempty():
-        print("All critters have died.")
-        break
     time.sleep(.1)
-
 

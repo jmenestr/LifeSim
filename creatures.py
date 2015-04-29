@@ -24,13 +24,16 @@ class Life_Form:
             "w": Vector(-1,0),
             "nw": Vector(-1,1)
         }
-        self.energy = random.randint(10,25)
+        self.energy = 3
 
     def setPosition(self,vector):
         self.position = vector
 
     def loseEnergy(self,value = 0.2):
         self.energy -= value
+
+    def gainEnergy(self,value):
+        self.energy += value
 
     def returnEnergy(self):
         return self.energy
@@ -49,12 +52,12 @@ class Life_Form:
         target_pos = self.position.plus(direction)
         return world_grid.get(target_pos)
 
-    def findFreeSquares(self,world_gird):
+    def findFreeSquares(self,world_grid):
         direction_keys = [key for key in self.directions.keys()]
         free_direction_vectors = []
         for direction in direction_keys:
             direction_vector = self.directions[direction]
-            if self.critterLook(world_gird,direction_vector) == " ":
+            if self.critterLook(world_grid,direction_vector) == " ":
                 free_direction_vectors.append(direction_vector)
         return free_direction_vectors
 
@@ -65,6 +68,7 @@ class Plant(Life_Form):
     def __init__(self,char,pos=Vector(-1,-1)):
         super(Plant,self).__init__(char,pos)
         self.energy = random.randint(1,5)+3
+        self.dead = False
 
     def act(self,world_grid):
         if self.energy <=10:
@@ -73,8 +77,7 @@ class Plant(Life_Form):
             self.energy /= 2
             return self.reproduce(world_grid)
 
-
-    def grow(self,value = 1):
+    def grow(self,value = .1):
         event ={"action":"grow"}
         self.energy += value
         return event,self.position
@@ -88,34 +91,55 @@ class Plant(Life_Form):
         else:
             return self.grow()
 
+    def kill(self):
+        self.dead = True
 
+    def plantDead(self):
+        return self.dead
 
 class BouncingCritter(Life_Form):
 
     def __init__(self, char, pos=Vector(-1,-1)):
         super(BouncingCritter,self).__init__(char,pos)
 
-    def getDirection(self):
-        dir_keys = [key for key in self.directions.keys()]
-        return random.choice(dir_keys)
+    def findPlantSquares(self,world_grid):
+        direction_keys = [key for key in self.directions.keys()]
+        surrounding_plants = []
+        for direction in direction_keys:
+            dir_to_look=self.directions[direction]
+            element = self.critterLook(world_grid,dir_to_look)
+            if isinstance(element,Plant):
+                surrounding_plants.append(dir_to_look)
+        return surrounding_plants
 
     def act(self,world_grid):
-        if self.energy >= 15:
-            self.energy -= 14
-            return self.reproduce(world_grid)
-        elif self.energy <= 0:
+        if self.energy <= 0:
             return self.die(world_grid)
+        elif self.energy >= 12:
+            self.energy -= 6
+            return self.reproduce(world_grid)
+        elif self.energy <= 5:
+            return self.eat(world_grid)
         else:
-            self.energy -= .2
             return self.move(world_grid)
 
     def move(self,world_grid):
         event = {"action": "move"}
-        dir = self.getDirection()
-        dir_vec = self.directions[dir]
-        if self.critterLook(world_grid,dir_vec) == " ":
-            return event,self.position.plus(dir_vec)
+        self.energy -= .2
+        free_spaces = self.findFreeSquares(world_grid)
+        if len(free_spaces) > 0:
+            dest = random.choice(free_spaces)
+            return event,self.position.plus(dest)
         return event,self.position
+
+    def eat(self,word_grid):
+        event = {"action":"eat"}
+        plant_spaces = self.findPlantSquares(word_grid)
+        if len(plant_spaces) > 0:
+            destination = random.choice(plant_spaces)
+            return event,self.position.plus(destination)
+        return self.move(word_grid)
+
 
     def reproduce(self,world_grid):
         event = {"action":"reproduce"}
@@ -130,8 +154,6 @@ class BouncingCritter(Life_Form):
         event = {"action":"die"}
         return event,self.position
 
-    def eat(self,world_grid):
-        event = {"action": "eat"}
 
 class WallFollower(Life_Form):
     def __init__(self, char, pos=Vector(-1,-1)):

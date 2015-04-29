@@ -51,12 +51,23 @@ class World:
                 self.grid.set(dest,baby_crit)
                 critters_after_turn.append(critter)
                 critters_after_turn.append(baby_crit)
+            if event["action"] == "eat":
+                target_plant = self.grid.get(dest)
+                target_plant_energy = target_plant.returnEnergy()
+                critter.gainEnergy(target_plant_energy)
+                target_plant.kill()
+                self.grid.set(critter.position," ")
+                self.grid.set(dest,critter)
+                critter.setPosition(dest)
+                critters_after_turn.append(critter)
             if event["action"] == "die":
                 self.grid.set(critter.position," ")
         self.critters = critters_after_turn
 
         plants_after_turn= []
         for plant in self.plants:
+            if plant.plantDead():
+                continue
             (event,dest) = plant.act(self.grid)
             if event["action"] == "grow":
                 plants_after_turn.append(plant)
