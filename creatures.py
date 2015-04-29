@@ -71,11 +71,11 @@ class Plant(LifeForm):
         self.dead = False
 
     def act(self,world_grid):
-        if self.energy <=10:
-            return self.grow()
-        else:
+        if self.energy >= 20:
             self.energy /= 2
             return self.reproduce(world_grid)
+        else:
+            return self.grow()
 
     def grow(self,value = .1):
         event ={"action":"grow"}
