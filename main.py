@@ -23,7 +23,6 @@ plan =     ["#############################",
 world = World(plan,{"#": Wall,"f": BouncingCritter,"x": BouncingCritter,"~": WallFollower})
 
 for i in range(100):
-    os.system("cls")
     world.turn()
     print(world.worldToString())
     if world.isempty():

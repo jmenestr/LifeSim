@@ -24,7 +24,7 @@ class Life_Form:
             "w": Vector(-1,0),
             "nw": Vector(-1,1)
         }
-        self.energy = random.randint(10,20)
+        self.energy = random.randint(10,25)
 
     def setPosition(self,vector):
         self.position = vector
@@ -157,11 +157,8 @@ class WallFollower(Life_Form):
 
     def reproduce(self,world_grid):
         event = {"action":"reproduce"}
-        dir = self.getDirection(world_grid)
-        dest = self.directions[dir]
-        while self.critterLook(world_grid,dest) != " ":
-            dir = self.getDirection()
-            dest = self.directions[dir]
+        free_spaces = self.findFreeSquares(world_grid)
+        dest = random.choice(free_spaces)
         return event,self.position.plus(dest)
 
     def die(self,world_grid):
