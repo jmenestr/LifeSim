@@ -7,6 +7,7 @@ class World:
         self.grid = Grid(len(plan[0]),len(plan))
         self.legend = legend
         self.critters = []
+        self.plants = []
         self.setUpWorld(plan)
 
     def createElement(self,char):
@@ -22,6 +23,9 @@ class World:
                 if isinstance(element,BouncingCritter) or isinstance(element,WallFollower):
                     element.setPosition(Vector(x,y))
                     self.critters.append(element)
+                if isinstance(element,Plant):
+                    element.setPosition(Vector(x,y))
+                    self.plants.append(element)
                 self.grid.set(Vector(x,y),element)
 
     def charFromElement(self,element):
@@ -50,6 +54,18 @@ class World:
             if event["action"] == "die":
                 self.grid.set(critter.position," ")
         self.critters = critters_after_turn
+
+        plants_after_turn= []
+        for plant in self.plants:
+            (event,dest) = plant.act(self.grid)
+            if event["action"] == "grow":
+                plants_after_turn.append(plant)
+            elif event["action"] == "reproduce":
+                new_plant = Plant(plant.OriginChar(),dest)
+                self.grid.set(dest,new_plant)
+                plants_after_turn.append(new_plant)
+                plants_after_turn.append(plant)
+        self.plants = plants_after_turn
         '''
             new_pos = critter.move(self.grid)
             self.grid.set(critter.position," ")

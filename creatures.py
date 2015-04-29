@@ -61,20 +61,39 @@ class Life_Form:
     def OriginChar(self):
         return self.char
 
-def Plant(LifeForm):
+class Plant(Life_Form):
     def __init__(self,char,pos=Vector(-1,-1)):
         super(Plant,self).__init__(char,pos)
         self.energy = random.randint(1,5)+3
 
-    def gainEnergy(self,value = 0.5):
+    def act(self,world_grid):
+        if self.energy <=10:
+            return self.grow()
+        else:
+            self.energy /= 2
+            return self.reproduce(world_grid)
+
+
+    def grow(self,value = 1):
+        event ={"action":"grow"}
         self.energy += value
+        return event,self.position
+
+    def reproduce(self,world_grid):
+        event = {"action":"reproduce"}
+        free_spaces = self.findFreeSquares(world_grid)
+        if len(free_spaces) > 0:
+            dest = random.choice(free_spaces)
+            return event,self.position.plus(dest)
+        else:
+            return self.grow()
+
 
 
 class BouncingCritter(Life_Form):
 
     def __init__(self, char, pos=Vector(-1,-1)):
         super(BouncingCritter,self).__init__(char,pos)
-
 
     def getDirection(self):
         dir_keys = [key for key in self.directions.keys()]
