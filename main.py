@@ -7,6 +7,7 @@ import time
 
 
 plan =     ["#############################",
+<<<<<<< HEAD
             "#        x        ~   x    ##",
             "#   * ***     ~     x  **   #",
             "#    **** #####        **   #",
@@ -17,10 +18,41 @@ plan =     ["#############################",
             "#   ##         x   **       #",
             "# ** #   **       x**  ###  #",
             "#    #   **   ~    xxx      #",
+=======
+            "#    O  f f      O ~   f   ##",
+            "#  f * ***     ~     f  *** #",
+            "#   f**** #####        ***  #",
+            "##   f    f   #   #  f  ##  #",
+            "###   ****  f ##     #   f  #",
+            "#   f  ****f ###  O   #     #",
+            "# f ####                 f ~#",
+            "#   ##   O     f   **       #",
+            "#    #   **       f**  ###  #",
+            "#    #   **   ~      f      #",
+>>>>>>> origin/master
             "#############################"]
 
+plan2 =   ["####################################################",
+           "#              @   ####         ****             ###",
+           "#   *  O  ##                 ########       OO    ##",
+           "#   *    ##        O O                 ****       *#",
+           "#       ##*         O O       @      ##########   *#",
+           "#      ##***  *         ****                     **#",
+           "#* **  #  *  ***      #########              O   **#",
+           "#* **  #      *               #   *   O          **#",
+           "#     ##              #   O   #  ***          ######",
+           "#*            @       #       #   *        O  #    #",
+           "#*       @             #  ######                 **#",
+           "###          ****          ***         @         **#",
+           "#       O                        O         O       #",
+           "#   *     ##  ##  ##  ##               ###      *  #",
+           "#   **         #              *       #####  O     #",
+           "##  **  O   O  #  #    ***  ***        ###      ** #",
+           "###               #   *****       O            ****#",
+           "####################################################"]
 
-world = World(plan,{"#": Wall,"f": BouncingCritter,"x": BouncingCritter,"~": WallFollower,"*": Plant})
+
+world = World(plan2,{"#": Wall,"O": BouncingCritter,"*": Plant,"@": Predator})
 print(world.worldToString())
 x = 0
 while len(world.critters)>0:
@@ -28,6 +60,7 @@ while len(world.critters)>0:
     os.system("clear")
     world.turn()
     print(world.worldToString())
+    print({'"#": Wall,"x": BouncingCritter,"~": WallFollower,"*": Plant, "O": Predator'})
     time.sleep(.1)
 
 print(x)
