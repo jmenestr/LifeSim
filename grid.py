@@ -1,4 +1,4 @@
-import vector
+
 
 class Grid:
     def __init__(self,height,width):

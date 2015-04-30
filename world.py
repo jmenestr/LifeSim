@@ -1,5 +1,4 @@
 from grid import *
-from vector import *
 from creatures import *
 
 class World:
